@@ -1,0 +1,103 @@
+---
+title: "DSCI 335 Simulation assignment 2"
+author: "Henrique Magalhaes Rio"
+output: pdf_document
+header-includes:
+  - \usepackage{xcolor}
+  - \usepackage{framed}
+---
+
+<!-- STUDENTS: change the "author" listed above
+DO NOT EDIT THE SECTION BELOW -->
+\colorlet{shadecolor}{gray!10}
+```{r setup, include=FALSE}
+library(knitr)
+#install the tidyverse library (do this once)
+#install.packages("tidyverse")
+library(tidyverse)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 4, fig.height = 4, tidy = TRUE)
+```
+\newcommand{\hstart}{ \colorlet{shadecolor}{orange!20}
+\begin{shaded} }
+\newcommand{\hstop}{  \end{shaded} \colorlet{shadecolor}{gray!10}}
+<!-- STUDENTS: DO NOT EDIT THE SECTION ABOVE 
+start here, insert assignment below -->
+
+# Problem 1
+
+
+```{r prob1}
+#code for problem 1.  This should be code that runs and produces output when you knit the document.
+set.seed(42) #set.seed() ensures that your "random" values are replicable
+Population_N <- 1000000
+Smoke <- rbinom(n=Population_N,size=1,prob=0.3)
+
+table(Smoke,Cancer)
+
+```
+
+
+```{r prob1}
+#code for problem 1.  This should be code that runs and produces output when you knit the document.
+Cancer <- rbinom(n=Population_N,size=1,prob=Smoke*0.18+0.02)
+Sampling_frame <- data.frame(Smoke,Cancer)
+
+```
+
+```{r}
+Population_Cases <- subset(Sampling_frame,Cancer==1)
+Population_Controls <- subset(Sampling_frame,Cancer==0)
+```
+
+
+```{r}
+Sample_N <- 100
+Selected_Cases <- sample(nrow(Population_Cases),Sample_N)
+Sampled_Cases <- Population_Cases[Selected_Cases,]
+Selected_Controls <- sample(nrow(Population_Controls),Sample_N)
+Sampled_Controls <- Population_Controls[Selected_Controls,]
+Test_Sample <- rbind(Sampled_Cases,Sampled_Controls)
+```
+
+```{r}
+Sampled_Smokers <- subset(Test_Sample,Smoke==1)
+Sampled_NonSmokers <- subset(Test_Sample,Smoke==0)
+```
+
+```{r}
+Risk_Smoker <- sum(Sampled_Smokers[,2]==1)/nrow(Sampled_Smokers)
+Risk_NonSmoker <- sum(Sampled_NonSmokers[,2]==1)/nrow(Sampled_NonSmokers)
+Sample_Relative_Risk <- Risk_Smoker/Risk_NonSmoker
+Sample_Relative_Risk
+```
+
+\hstart
+
+insert problem 1 answer here  (make sure you keep the blank lines around your answer)
+
+\hstop
+
+## Problem 2
+
+```{r prob2}
+#code for prob2
+
+```
+
+
+\hstart
+
+insert problem 2 answer here.  Repeat this format for all problems in the assignment...
+
+\hstop
+
+
+
+<!-- STUDENTS: STOP HERE
+DO NOT EDIT THE SECTION BELOW -->
+
+## Appendix
+
+```{r show-code, ref.label = all_labels(), echo = TRUE, eval = FALSE}
+
+```

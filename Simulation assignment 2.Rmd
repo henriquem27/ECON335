@@ -1,0 +1,273 @@
+---
+title: "DSCI 335 simulation assignment 2"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### For part 1 of this assignment, you'll simulate a "case-control" type study, investigating rates of lung cancer among smokers and non-smokers.  The following code creates simulated data and calculates the relative risk (RR).
+
+### First, generate a "population" of size 1,000,000 in which people have a 30% chance of smoking.
+
+```{r}
+set.seed(42) #set.seed() ensures that your "random" values are replicable
+Population_N <- 1000000
+Smoke <- rbinom(n=Population_N,size=1,prob=0.3)
+```
+
+### Now randomly assign cases of lung cancer, where smokers have a 20% chance of cancer and non-smokers have a 2% chance.  Create a "sampling frame" from which we will sample our data.
+```{r}
+Cancer <- rbinom(n=Population_N,size=1,prob=Smoke*0.18+0.02)
+Sampling_frame <- data.frame(Smoke,Cancer)
+```
+
+### Take a quick look at the fake population you created to make sure everything looks OK
+```{r}
+table(Smoke,Cancer)
+```
+
+### Separate out cancer "cases" from no-cancer "controls", at the population level
+```{r}
+Population_Cases <- subset(Sampling_frame,Cancer==1)
+Population_Controls <- subset(Sampling_frame,Cancer==0)
+```
+
+### Sample the same number of cases and controls.  
+
+* This reflects what is done in real research; first you get a certain number of people with the disease, then you get the same (or a similar) number without the disease.  
+
+* In reality, the controls would be "matched" to cases on the basis of covariates like age, sex, etc. For the sake of simplicity we won't do this.  If you wanted to simulate the effect of unaccounted for sampling bias, you could generate a population in which these covariates affect smoking status and / or cancer risk, then fail to account for them when choosing controls.
+
+```{r}
+Sample_N <- 100
+Selected_Cases <- sample(nrow(Population_Cases),Sample_N)
+Sampled_Cases <- Population_Cases[Selected_Cases,]
+
+Selected_Controls <- sample(nrow(Population_Controls),Sample_N)
+Sampled_Controls <- Population_Controls[Selected_Controls,]
+
+Test_Sample <- rbind(Sampled_Cases,Sampled_Controls)
+```
+
+
+### Now separate out the smokers and non-smokers from the test sample
+```{r}
+Sampled_Smokers <- subset(Test_Sample,Smoke==1)
+Sampled_NonSmokers <- subset(Test_Sample,Smoke==0)
+```
+
+### Finally, calcuate the relative risk
+```{r}
+Risk_Smoker <- sum(Sampled_Smokers[,2]==1)/nrow(Sampled_Smokers)
+Risk_NonSmoker <- sum(Sampled_NonSmokers[,2]==1)/nrow(Sampled_NonSmokers)
+Sample_Relative_Risk <- Risk_Smoker/Risk_NonSmoker
+Sample_Relative_Risk
+```
+
+### Note that this is a single iteration of a simulation.  If we run the simulation again, we should get a different value for the RR.  Here is code that runs this 10 times, then calculates the mean RR and makes a histogram.  (We are using only 10 reps for the sake of computation time.)
+
+```{r}
+reps <- 10
+Relative_Risks <- rep(0,reps)
+Population_N <- 1000000
+Sample_N <- 100
+
+for(i in 1:reps) {
+Smoke <- rbinom(n=Population_N,size=1,prob=0.3)
+Cancer <- rbinom(n=Population_N,size=1,prob=Smoke*0.18+0.02)
+Sampling_frame <- data.frame(Smoke,Cancer)
+
+Population_Cases <- subset(Sampling_frame,Cancer==1)
+Population_Controls <- subset(Sampling_frame,Cancer==0)
+
+Selected_Cases <- sample(nrow(Population_Cases),Sample_N)
+Sampled_Cases <- Population_Cases[Selected_Cases,]
+
+Selected_Controls <- sample(nrow(Population_Controls),Sample_N)
+Sampled_Controls <- Population_Controls[Selected_Controls,]
+
+Test_Sample <- rbind(Sampled_Cases,Sampled_Controls)
+Sampled_Smokers <- subset(Test_Sample,Smoke==1)
+Sampled_NonSmokers <- subset(Test_Sample,Smoke==0)
+Risk_Smoker <- sum(Sampled_Smokers[,2]==1)/nrow(Sampled_Smokers)
+Risk_NonSmoker <- sum(Sampled_NonSmokers[,2]==1)/nrow(Sampled_NonSmokers)
+Sample_Relative_Risk <- Risk_Smoker/Risk_NonSmoker
+
+Relative_Risks[i] <- Sample_Relative_Risk
+}
+
+hist(Relative_Risks)
+mean(Relative_Risks)
+
+```
+
+### Here are the problems for this part of the assignment.  As with the first assignment, you should make an .rmd file with your solutions, using code chunks and plain text where appropriate, knit this to .pdf, and upload the .pdf on Canvas.
+
+1. Do the values in the table of population smoking and cancer rates look about right, given the probabilities used to generate the data?  Briefly explain
+
+\hstart
+
+
+They seem to be about right considering the probabilities, about 6% of the population should be smokers with cancer for example, in the simulation we have 6.03% which is pretty close.
+
+\hstop
+
+2. The population RR should be $\frac{0.2}{0.02}=10$.  But the RR values produced in the simulated data are much different, suggesting that the sample RR is a biased estimator of the population RR under this "case control" design.  Why do you think this is?  Give the best explanation you can.
+
+\hstart
+
+I do not know
+
+\hstop
+
+3. Modify the code above to compute odds ratios (ORs) rather than relative risks. Use 1000 reps (you may want to test your code with fewer reps first to make sure it works). Report the mean odds ratio and a histogram of odds ratios from your simulation.
+
+```{r}
+
+
+reps <- 10
+odd <- rep(0,reps)
+Population_N <- 1000000
+Sample_N <- 100
+
+for(i in 1:reps) {
+Smoke <- rbinom(n=Population_N,size=1,prob=0.3)
+Cancer <- rbinom(n=Population_N,size=1,prob=Smoke*0.18+0.02)
+Sampling_frame <- data.frame(Smoke,Cancer)
+
+Population_Cases <- subset(Sampling_frame,Cancer==1)
+Population_Controls <- subset(Sampling_frame,Cancer==0)
+
+Selected_Cases <- sample(nrow(Population_Cases),Sample_N)
+Sampled_Cases <- Population_Cases[Selected_Cases,]
+
+Selected_Controls <- sample(nrow(Population_Controls),Sample_N)
+Sampled_Controls <- Population_Controls[Selected_Controls,]
+
+Test_Sample <- rbind(Sampled_Cases,Sampled_Controls)
+Sampled_Smokers <- subset(Test_Sample,Smoke==1)
+Sampled_NonSmokers <- subset(Test_Sample,Smoke==0)
+Risk_Smoker <- sum(Sampled_Smokers[,2]==1)/nrow(Sampled_Smokers)
+Risk_NonSmoker <- sum(Sampled_NonSmokers[,2]==1)/nrow(Sampled_NonSmokers)
+Sample_odd <- (Risk_Smoker/(1-Risk_Smoker))/(Risk_NonSmoker/(1-Risk_NonSmoker))
+
+odd[i] <- Sample_odd
+}
+
+hist(odd)
+mean(odd)
+
+
+```
+
+
+4. Does the sample odds ratio also appear to be a biased estimator of the population odds ratio?  Explain.
+
+\hstart
+
+It does appear to be a biased estimator, as the odd ratio of the population   $\frac{\frac{0.2}{1-0.2}}{\frac{0.02}{1-0.02}}=12.25$, over the 100 sample we got that the odd ratio estimator was around 11.39 which is close, but not close enough.
+
+\hend
+
+
+```{r}
+reps <- 10
+odd <- rep(0,reps)
+Population_N <- 1000000
+Sample_N <- 1000
+
+for(i in 1:reps) {
+Smoke <- rbinom(n=Population_N,size=1,prob=0.3)
+Cancer <- rbinom(n=Population_N,size=1,prob=Smoke*0.18+0.02)
+Sampling_frame <- data.frame(Smoke,Cancer)
+
+Population_Cases <- subset(Sampling_frame,Cancer==1)
+Population_Controls <- subset(Sampling_frame,Cancer==0)
+
+Selected_Cases <- sample(nrow(Population_Cases),Sample_N)
+Sampled_Cases <- Population_Cases[Selected_Cases,]
+
+Selected_Controls <- sample(nrow(Population_Controls),Sample_N)
+Sampled_Controls <- Population_Controls[Selected_Controls,]
+
+Test_Sample <- rbind(Sampled_Cases,Sampled_Controls)
+Sampled_Smokers <- subset(Test_Sample,Smoke==1)
+Sampled_NonSmokers <- subset(Test_Sample,Smoke==0)
+Risk_Smoker <- sum(Sampled_Smokers[,2]==1)/nrow(Sampled_Smokers)
+Risk_NonSmoker <- sum(Sampled_NonSmokers[,2]==1)/nrow(Sampled_NonSmokers)
+Sample_odd <- (Risk_Smoker/(1-Risk_Smoker))/(Risk_NonSmoker/(1-Risk_NonSmoker))
+
+odd[i] <- Sample_odd
+}
+
+hist(odd)
+mean(odd)
+
+
+```
+
+
+
+
+5. Re-run your code from part 3. above, but this time increase the sample size from 100 per group to 1000 per group.  How does this affect your results?  Why do you think your results are affected this way?
+
+\hstart
+
+Now with the higher sample the simulation odd is much closer to the population at 12.20, this due to the sample size that causes the simulation to be much closer to the population.
+
+\hend
+
+
+
+### The following code simulates the "range restriction" effect that Adrian Simpson describes in "The Misdirection of Public Policy".  The questions that follow ask you about what this code is doing, so you may want to copy it into a regular R script and run it line by line, looking at what each line does.  You may also want to review "range restriction" if you don't remember what it refers to.
+
+```{r}
+scores_ctrl <- rnorm(n=500,mean=65,sd=10)
+scores_trt <- rnorm(n=500,mean=70,sd=10)
+pooled_sd <- sqrt((499*sd(scores_ctrl)^2+499*sd(scores_trt)^2)/998)
+d_full_class <- (mean(scores_trt)-mean(scores_ctrl))/pooled_sd
+ 
+scores_ctrl_low <- sort(scores_ctrl)[1:250]
+scores_ctrl_high <- sort(scores_ctrl)[251:500]
+scores_trt_low <- sort(scores_trt)[1:250]
+scores_trt_high <- sort(scores_trt)[251:500]
+
+pooled_sd_bottom <- sqrt((249*sd(scores_trt_low)^2+249*sd(scores_ctrl_low)^2)/498)
+pooled_sd_top <- sqrt((249*sd(scores_trt_high)^2+249*sd(scores_ctrl_high)^2)/498)
+d_bottom <- (mean(scores_trt_low)-mean(scores_ctrl_low))/pooled_sd_bottom
+d_top <- (mean(scores_trt_high)-mean(scores_ctrl_high))/pooled_sd_top
+
+```
+
+6. Based on the first two lines of code, what is the population Cohen's d value of the treatment effect being simulated here?
+
+\hstart
+
+5?
+
+\hend
+
+7. The middle chunk of code creates vectors that each end in "_low" or "_high".  Briefly describe what these vectors contain.
+
+\hstart
+
+It splits the samples in half, by separting into the lower half and higher half.
+
+\hend
+
+
+8. Report the values of d_full_class, d_bottom, and d_top.  Describe what each of these values represent in this simulation.
+
+\hstart
+
+r
+
+\hend
+
+
+9. Explain what caused d_bottom and d_top to end up so different from d_full_class.
+
